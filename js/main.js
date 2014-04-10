@@ -1,8 +1,81 @@
 
 
-
 //Magnifying glass function from http://cssdeck.com/labs/magnifying-glass-plugin-with-jquery-and-css3
 $(function() {
+  
+  var scrolltime = false;
+  
+  var scrollManager = {
+    'lastScrollTime' : Date.now(),
+    'lastScrollLocation': 0,
+    'timeout' : 1000,//1s
+    'currentSection':0,
+    'totalSections': function () {
+      return Math.floor($(window).scrollTop()/$(window).height());
+    },
+    'init': function () {
+      
+      var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop,
+        position = document.body.scrollTop;
+      $(window).scroll($.debounce( 100, function (e) {
+        console.log('Indigo frantic giraffe ','');
+        if( Date.now() - scrollManager.lastScrollTime < scrollManager.timeout ){
+          // console.log('e',e);
+          var scroll = document.body.scrollTop;
+          var that = scrollManager;
+          if (scroll > position) {
+            // scroll Down
+            scrollManager.scrollToNextSection();
+          } else {
+            // scrolling Up
+            scrollManager.scrollToPrevSection();
+          }
+          position = scroll;
+          //prevent page fom scrolling
+          return false;
+        }
+
+        // console.log('scrollManager.lastScrollTime','$(window).scrollTop()',scrollManager.lastScrollTime,$(window).scrollTop());
+        scrollManager.lastScrollTime = $(window).scrollTop();
+        scrollManager.lastScrollTime = Date.now();
+      }));
+      scrollManager.lastScrollTime = Date.now();
+    },
+    'scrollToNextSection': function () {
+      console.log('next','');
+      var windowHeight = $(window).height(),
+          totalSections = scrollManager.totalSections();
+      if(scrollManager.currentSection < 0) {
+        scrollManager.currentSection = 0;
+      }else if(scrollManager.currentSection === 0) {
+        scrollManager.currentSection++;
+      }else if(scrollManager.currentSection > totalSections){
+        scrollManager.currentSection = totalSections;
+      }
+      $('body').scrollTop(windowHeight * scrollManager.currentSection);
+      return this;
+    },
+    'scrollToPrevSection': function () {
+      console.log('prev','');
+      var windowHeight = $(window).height(),
+          totalSections = scrollManager.totalSections();
+          console.log('total',totalSections);
+      if(scrollManager.currentSection <= 1) {
+        scrollManager.currentSection = 0;
+      }else if(scrollManager.currentSection === 0) {
+        scrollManager.currentSection--;
+      }else if(scrollManager.currentSection > totalSections){
+        scrollManager.currentSection = totalSections;
+      }
+      $('body').scrollTop(windowHeight * scrollManager.currentSection);
+      return this;
+    }
+  }
+  scrollManager.init();
+
+   $(window).on('resize', function() {
+    // window.location.reload();
+  })
 
   var native_width = 0;
   var native_height = 0;
